@@ -6,7 +6,6 @@
 //
 import SwiftUI
 
-let DEFAULT_BUTTON_SIZE: CGFloat = 25.0
 struct RecordingListItem: View {
     @Binding var isSelected: Bool
     var voiceMemo: VoiceMemo
@@ -54,12 +53,12 @@ struct RecordingListItem: View {
                             .font(.subheadline)
                     },
                     maximumValueLabel: {
-                        Text(DateUtilities.formatTime(seekPosition))
+                        Text(DateUtilities.formatTime(localSeekPosition))
                             .font(.subheadline)
                     },
                     onEditingChanged: { isEditing in
                         isDragging = isEditing
-                        if !isEditing {
+                        if isEditing {
                             onSeekTo(localSeekPosition)
                         }
                     }
@@ -73,14 +72,7 @@ struct RecordingListItem: View {
                         item: FileUtilities.getDefaultDirectory(
                             fileName: voiceMemo.fileName)
                     ) {
-                        Image(systemName: "square.and.arrow.up")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .foregroundStyle(.red)
-                            .backgroundStyle(.clear)
-                            .frame(
-                                width: DEFAULT_BUTTON_SIZE,
-                                height: DEFAULT_BUTTON_SIZE)
+                        ItemIcon(icon: "square.and.arrow.up", color: .red)
                     }
 
                     Spacer()
@@ -88,46 +80,19 @@ struct RecordingListItem: View {
                     Button {
                         onRewindCallback()
                     } label: {
-                        Image(
-                            systemName: "15.arrow.trianglehead.counterclockwise"
-                        )
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .foregroundStyle(.white)
-                        .backgroundStyle(.clear)
-
-                        .frame(
-                            width: DEFAULT_BUTTON_SIZE,
-                            height: DEFAULT_BUTTON_SIZE)
+                        ItemIcon(icon: "15.arrow.trianglehead.counterclockwise")
                     }
 
                     Button {
                         onPlayCallback()
                     } label: {
-                        Image(
-                            systemName: isPlaying ? "pause.fill" : "play.fill"
-                        )
-                        .resizable()
-                        .foregroundStyle(.white)
-                        .aspectRatio(contentMode: .fit)
-                        .backgroundStyle(.clear)
-                        .frame(
-                            width: DEFAULT_BUTTON_SIZE,
-                            height: DEFAULT_BUTTON_SIZE)
+                        ItemIcon(icon: isPlaying ? "pause.fill" : "play.fill")
                     }
 
                     Button {
                         onFastForwardCallback()
                     } label: {
-                        Image(systemName: "15.arrow.trianglehead.clockwise")
-                            .resizable()
-                            .foregroundStyle(.white)
-                            .aspectRatio(contentMode: .fit)
-                            .backgroundStyle(.clear)
-
-                            .frame(
-                                width: DEFAULT_BUTTON_SIZE,
-                                height: DEFAULT_BUTTON_SIZE)
+                        ItemIcon(icon: "15.arrow.trianglehead.clockwise")
                     }
 
                     Spacer()
@@ -135,14 +100,7 @@ struct RecordingListItem: View {
                     Button {
                         onDeleteCallback()
                     } label: {
-                        Image(systemName: "trash")
-                            .resizable()
-                            .foregroundStyle(.red)
-                            .aspectRatio(contentMode: .fit)
-                            .backgroundStyle(.clear)
-                            .frame(
-                                width: DEFAULT_BUTTON_SIZE,
-                                height: DEFAULT_BUTTON_SIZE)
+                        ItemIcon(icon: "trash", color: .red)
                     }
 
                 }
@@ -151,9 +109,9 @@ struct RecordingListItem: View {
             Divider()
                 .padding(.top, 6)
         }
-        .onChange(of: seekPosition) { newSeekPosition in
+        .onChange(of: seekPosition) { oldValue, newValue in
             if !isDragging {
-                localSeekPosition = newSeekPosition
+                localSeekPosition = newValue
             }
         }
         .padding(.leading, 16)

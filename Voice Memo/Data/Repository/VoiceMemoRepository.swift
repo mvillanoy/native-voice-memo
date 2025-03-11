@@ -15,10 +15,11 @@ class VoiceMemoRepository {
         }
     
     func getVoiceMemos(query: String = "") -> [VoiceMemo] {
-        var predicate: Predicate<VoiceMemo>? = nil
-        if query.isEmpty {
-            predicate = #Predicate<VoiceMemo> { $0.fileName.contains(query) }
-        }
+        // TODO: Search functionality
+//        var predicate: Predicate<VoiceMemo>? = nil
+//        if query.isEmpty {
+//            predicate = #Predicate<VoiceMemo> { $0.fileName.contains(query) }
+//        }
         let fetchDescriptor = FetchDescriptor<VoiceMemo>(
             sortBy: [SortDescriptor(\.timestamp, order: .reverse)])
         do {

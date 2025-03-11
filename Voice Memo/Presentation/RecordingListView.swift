@@ -17,7 +17,7 @@ struct RecordingListView: View {
     @State var query: String = ""
     @State var selectedId: UUID? = nil
     @State var showAlert: Bool = false
-    
+
     var body: some View {
         VStack {
             NavigationView {
@@ -35,8 +35,10 @@ struct RecordingListView: View {
                 .environmentObject(viewModel)
         }
         .alert(isPresented: $showAlert) {
-            Alert(title: Text("Error"), message: Text(viewModel.error ?? "Error"), dismissButton: .default(Text("Ok")))
-                }
+            Alert(
+                title: Text("Error"), message: Text(viewModel.error ?? "Error"),
+                dismissButton: .default(Text("OK")))
+        }
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .onAppear {
             viewModel.setInjected(injected: diContainer)
@@ -46,33 +48,41 @@ struct RecordingListView: View {
                 showAlert = true
             }
         }
+        .onReceive(viewModel.$selectedVoiceMemo, perform: { selected in
+            selectedId = selected?.id
+        })
 
     }
-    
+
     func generateItems() -> AnyView {
-        AnyView(LazyVStack {
-            ForEach(viewModel.voiceMemos) { item in
-                RecordingListItem(isSelected: .constant(selectedId == item.id), voiceMemo: item, isPlaying: .constant(viewModel.isPlaying), seekPosition: .constant(viewModel.playerDuration)) {
-                    viewModel.deleteVoiceMemo()
-                } onPlayCallback: {
-                    viewModel.playPauseVoiceMemo()
-                } onRewindCallback: {
-                    viewModel.rewindVoiceMemo()
-                } onFastForwardCallback: {
-                    viewModel.fastForwardVoiceMemo()
+        AnyView(
+            LazyVStack {
+                ForEach(viewModel.voiceMemos) { item in
+                    RecordingListItem(
+                        isSelected: .constant(selectedId == item.id),
+                        voiceMemo: item,
+                        isPlaying: .constant(viewModel.isPlaying),
+                        seekPosition: .constant(viewModel.playerDuration)
+                    ) {
+                        viewModel.deleteVoiceMemo()
+                    } onPlayCallback: {
+                        viewModel.playPauseVoiceMemo()
+                    } onRewindCallback: {
+                        viewModel.rewindVoiceMemo()
+                    } onFastForwardCallback: {
+                        viewModel.fastForwardVoiceMemo()
 
-                } onSeekTo: { position in
-                    viewModel.seekVoiceMemo(to: position)
-                }
-                .onTapGesture {
-                    withAnimation(.smooth) {
-                        selectedId = item.id
-                        viewModel.selectVoiceMemo(item)
+                    } onSeekTo: { position in
+                        viewModel.seekVoiceMemo(to: position)
                     }
-                }
+                    .onTapGesture {
+                        withAnimation(.smooth) {
+                            selectedId = item.id
+                            viewModel.selectVoiceMemo(item)
+                        }
+                    }
 
-            }
-        })
+                }
+            })
     }
 }
-
