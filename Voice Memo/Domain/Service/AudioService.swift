@@ -28,13 +28,20 @@ class AudioService: ObservableObject {
         try audioSession.setActive(true)
     }
     
-    func startRecording() -> URL? {
+    func startRecording(fileName: String? = nil) -> URL? {
         let session = AVAudioSession.sharedInstance()
+        var name = fileName
+        if name == nil {
+            let date = Date()
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "YYYYMMddHHmmss"
+            name = "Voice Recording \(dateFormatter.string(from: date))"
+        }
         do {
             try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP])
             try session.setActive(true)
 
-            let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString).m4a")
+            let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(name ?? "Voice Recording").m4a")
             let settings: [String: Any] = [
                 AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
                 AVSampleRateKey: 12000,

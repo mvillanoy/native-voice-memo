@@ -22,10 +22,17 @@ struct Voice_MemoApp: App {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
+        
+        let diContainer: DIContainer
+    
+        init() {
+            self.diContainer = DIContainer(container: sharedModelContainer)
+        }
 
     var body: some Scene {
         WindowGroup {
             RecordingListView()
+                .environment(\.diContainer, diContainer)
         }
         .modelContainer(sharedModelContainer)
     }

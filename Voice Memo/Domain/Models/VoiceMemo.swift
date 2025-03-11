@@ -12,13 +12,15 @@ import SwiftData
 final class VoiceMemo {
     @Attribute(.unique) var id: UUID
     var fileName: String
-    var fileURL: URL?
+    var fileURL: URL
     var timestamp: Date
+    var duration: Int
     
-    init(fileName: String, fileURL: URL? = nil) {
+    init(fileName: String, fileURL: URL, duration: Int = 0) {
         self.id = UUID()
         self.fileName = fileName
         self.fileURL = fileURL
         self.timestamp = Date()
+        self.duration = duration
     }
 }

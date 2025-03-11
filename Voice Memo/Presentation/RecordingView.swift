@@ -9,19 +9,22 @@ import AVFoundation
 import SwiftUI
 
 struct RecordingView: View {
-    @StateObject private var viewModel: RecordingViewModel =
-        RecordingViewModel()
+    @Environment(\.diContainer) var diContainer: DIContainer
+    @StateObject private var viewModel: RecordingViewModel = RecordingViewModel()
 
     var body: some View {
         HStack {
             Spacer()
-            VStack {
+            VStack(alignment: .center) {
 
                 if viewModel.isRecording {
                     Text(viewModel.recordingFilename)
-                        .font(.title)
+                        .font(.headline)
+                        .bold()
+                        .multilineTextAlignment(.center)
+                        .padding(.bottom)
 
-                    Text(viewModel.recordingTime)
+                    Text(DateUtilities.formatTime(viewModel.duration))
                         .font(.subheadline)
                         .padding(.bottom)
                 }
@@ -53,6 +56,9 @@ struct RecordingView: View {
             }
             Spacer()
 
+        }
+        .onAppear {
+            viewModel.setInjected(injected: diContainer)
         }
         .padding(.top, 24)
         .background(.sheetBackground)
