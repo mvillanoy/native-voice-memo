@@ -58,7 +58,7 @@ struct RecordingListItem: View {
                     },
                     onEditingChanged: { isEditing in
                         isDragging = isEditing
-                        if isEditing {
+                        if !isEditing {
                             onSeekTo(localSeekPosition)
                         }
                     }
