@@ -38,10 +38,8 @@ class AudioService: NSObject {
 
         switch type {
         case .began:
-            print("Recording interrupted (e.g., phone call). Pausing...")
             audioRecorder?.pause()
         case .ended:
-            print("Interruption ended. Resuming recording...")
             audioRecorder?.record()
         default:
             break
@@ -123,7 +121,7 @@ class AudioService: NSObject {
 
     func playAudio(seekTo: TimeInterval? = nil) {
         if let seekTo = seekTo {
-            audioPlayer?.play(atTime: seekTo)
+            audioPlayer?.currentTime = seekTo
         } else {
             audioPlayer?.play()
         }

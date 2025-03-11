@@ -11,8 +11,10 @@ struct RecordingListItem: View {
     @Binding var isSelected: Bool
     var voiceMemo: VoiceMemo
     @Binding var isPlaying: Bool
-    @State var seekPosition: TimeInterval
-    
+    @Binding var seekPosition: TimeInterval
+    @State private var localSeekPosition: TimeInterval = 0
+    @State private var isDragging: Bool = false
+
     var onDeleteCallback: (() -> Void)
     var onPlayCallback: (() -> Void)
     var onRewindCallback: (() -> Void)
@@ -42,36 +44,47 @@ struct RecordingListItem: View {
             }
 
             if isSelected {
-                Slider(value: $seekPosition, label: {
-                    
-                }, minimumValueLabel: {
-                    Text("00:00")
-                    .font(.subheadline)
-                }, maximumValueLabel: {
-                    Text(DateUtilities.formatTime(seekPosition))
-                    .font(.subheadline)
-                }, onEditingChanged: { isEditing in
-                    if (isEditing) {
-                        onSeekTo(seekPosition)
+                Slider(
+                    value: $localSeekPosition, in: 0...voiceMemo.duration,
+                    label: {
+
+                    },
+                    minimumValueLabel: {
+                        Text("00:00")
+                            .font(.subheadline)
+                    },
+                    maximumValueLabel: {
+                        Text(DateUtilities.formatTime(seekPosition))
+                            .font(.subheadline)
+                    },
+                    onEditingChanged: { isEditing in
+                        isDragging = isEditing
+                        if !isEditing {
+                            onSeekTo(localSeekPosition)
+                        }
                     }
-                })
+                )
                 .foregroundStyle(.white)
                 .padding(.vertical, 4)
                 .padding(.trailing, 16)
 
-
                 HStack {
-                    ShareLink(item: FileUtilities.getDefaultDirectory(fileName: voiceMemo.fileName)) {
+                    ShareLink(
+                        item: FileUtilities.getDefaultDirectory(
+                            fileName: voiceMemo.fileName)
+                    ) {
                         Image(systemName: "square.and.arrow.up")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .foregroundStyle(.red)
                             .backgroundStyle(.clear)
-                            .frame(width: DEFAULT_BUTTON_SIZE, height: DEFAULT_BUTTON_SIZE)
-                        }
+                            .frame(
+                                width: DEFAULT_BUTTON_SIZE,
+                                height: DEFAULT_BUTTON_SIZE)
+                    }
 
                     Spacer()
-                    
+
                     Button {
                         onRewindCallback()
                     } label: {
@@ -83,18 +96,24 @@ struct RecordingListItem: View {
                         .foregroundStyle(.white)
                         .backgroundStyle(.clear)
 
-                        .frame(width: DEFAULT_BUTTON_SIZE, height: DEFAULT_BUTTON_SIZE)
+                        .frame(
+                            width: DEFAULT_BUTTON_SIZE,
+                            height: DEFAULT_BUTTON_SIZE)
                     }
 
                     Button {
                         onPlayCallback()
                     } label: {
-                        Image(systemName: isPlaying ? "pause.fill": "play.fill")
-                            .resizable()
-                            .foregroundStyle(.white)
-                            .aspectRatio(contentMode: .fit)
-                            .backgroundStyle(.clear)
-                            .frame(width: DEFAULT_BUTTON_SIZE, height: DEFAULT_BUTTON_SIZE)
+                        Image(
+                            systemName: isPlaying ? "pause.fill" : "play.fill"
+                        )
+                        .resizable()
+                        .foregroundStyle(.white)
+                        .aspectRatio(contentMode: .fit)
+                        .backgroundStyle(.clear)
+                        .frame(
+                            width: DEFAULT_BUTTON_SIZE,
+                            height: DEFAULT_BUTTON_SIZE)
                     }
 
                     Button {
@@ -106,7 +125,9 @@ struct RecordingListItem: View {
                             .aspectRatio(contentMode: .fit)
                             .backgroundStyle(.clear)
 
-                            .frame(width: DEFAULT_BUTTON_SIZE, height: DEFAULT_BUTTON_SIZE)
+                            .frame(
+                                width: DEFAULT_BUTTON_SIZE,
+                                height: DEFAULT_BUTTON_SIZE)
                     }
 
                     Spacer()
@@ -119,7 +140,9 @@ struct RecordingListItem: View {
                             .foregroundStyle(.red)
                             .aspectRatio(contentMode: .fit)
                             .backgroundStyle(.clear)
-                            .frame(width: DEFAULT_BUTTON_SIZE, height: DEFAULT_BUTTON_SIZE)
+                            .frame(
+                                width: DEFAULT_BUTTON_SIZE,
+                                height: DEFAULT_BUTTON_SIZE)
                     }
 
                 }
@@ -127,6 +150,11 @@ struct RecordingListItem: View {
             }
             Divider()
                 .padding(.top, 6)
+        }
+        .onChange(of: seekPosition) { newSeekPosition in
+            if !isDragging {
+                localSeekPosition = newSeekPosition
+            }
         }
         .padding(.leading, 16)
         .contentShape(Rectangle())

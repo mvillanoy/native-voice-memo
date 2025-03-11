@@ -67,8 +67,6 @@ class VoiceMemoRepository {
     }
 
     func deleteVoiceMemo(_ voiceMemo: VoiceMemo) {
-        print("deleteVoiceMemo repository")
-
             context.delete(voiceMemo)
                 do {
                     try context.save()

@@ -42,7 +42,7 @@ struct RecordingListView: View {
             viewModel.setInjected(injected: diContainer)
         }
         .onReceive(viewModel.$error) { error in
-            if let error = error {
+            if error != nil {
                 showAlert = true
             }
         }
@@ -52,15 +52,10 @@ struct RecordingListView: View {
     func generateItems() -> AnyView {
         AnyView(LazyVStack {
             ForEach(viewModel.voiceMemos) { item in
-                RecordingListItem(isSelected: .constant(selectedId == item.id), voiceMemo: item, isPlaying: .constant(viewModel.isPlaying), seekPosition: viewModel.playerDuration) {
+                RecordingListItem(isSelected: .constant(selectedId == item.id), voiceMemo: item, isPlaying: .constant(viewModel.isPlaying), seekPosition: .constant(viewModel.playerDuration)) {
                     viewModel.deleteVoiceMemo()
                 } onPlayCallback: {
-                    if viewModel.isPlaying {
-                        viewModel.pauseVoiceMemo()
-                    } else {
-                        viewModel.playVoiceMemo()
-                    }
-                    
+                    viewModel.playPauseVoiceMemo()
                 } onRewindCallback: {
                     viewModel.rewindVoiceMemo()
                 } onFastForwardCallback: {
@@ -72,7 +67,7 @@ struct RecordingListView: View {
                 .onTapGesture {
                     withAnimation(.smooth) {
                         selectedId = item.id
-                        viewModel.select(item)
+                        viewModel.selectVoiceMemo(item)
                     }
                 }
 
@@ -81,7 +76,3 @@ struct RecordingListView: View {
     }
 }
 
-#Preview {
-    RecordingListView()
-        .modelContainer(for: VoiceMemo.self, inMemory: true)
-}

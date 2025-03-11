@@ -37,42 +37,47 @@ class RecordingViewModel: ObservableObject {
         getVoiceMemos()
     }
     
-    func select(_ voiceMemo: VoiceMemo) {
+    func getVoiceMemos() {
+        voiceMemos = self.injected?.voiceMemoUseCase.getVoiceMemos() ?? []
+     }
+    
+    
+    // playback functions
+    func selectVoiceMemo(_ voiceMemo: VoiceMemo) {
         if voiceMemo.id != self.selectedVoiceMemo?.id {
             stopVoiceMemo()
         }
         self.selectedVoiceMemo = voiceMemo
         audioService.loadAudio(from: FileUtilities.getDefaultDirectory(fileName: self.selectedVoiceMemo!.fileName))
-
     }
     
-    func getVoiceMemos() {
-        voiceMemos = self.injected?.voiceMemoUseCase.getVoiceMemos() ?? []
-     }
-    
-    func playVoiceMemo() {
-        audioService.playAudio()
-        isPlaying = true
-        startTimer()
+    func playPauseVoiceMemo() {
+        if isPlaying {
+            audioService.pauseAudio()
+            isPlaying = false
+            stopTimer()
+        } else {
+            audioService.playAudio()
+            isPlaying = true
+            startTimer()
+        }
     }
     
-    func seekVoiceMemo(to time: TimeInterval) {
-        audioService.playAudio(seekTo: time)
-        self.playerDuration = time
-    }
-    
-    func pauseVoiceMemo() {
-        audioService.pauseAudio()
+    func stopVoiceMemo() {
+        audioService.stopAudio()
         isPlaying = false
-        stopTimer()
+        reset()
+    }
+
+    func seekVoiceMemo(to time: TimeInterval) {
+        self.playerDuration = time
+        audioService.playAudio(seekTo: time)
     }
     
     private func startTimer() {
           stopTimer()
-          timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-              if let self = self {
-                  self.playerDuration += 1
-              }
+          timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+              self.playerDuration += 1
           }
         
       }
@@ -82,11 +87,6 @@ class RecordingViewModel: ObservableObject {
           timer = nil
       }
     
-    func stopVoiceMemo() {
-        audioService.pauseAudio()
-        isPlaying = false
-    }
-    
     func deleteVoiceMemo() {
         if let selectedVoiceMemo = selectedVoiceMemo {
             self.injected?.voiceMemoUseCase.deleteVoiceMemo(selectedVoiceMemo)
@@ -95,13 +95,17 @@ class RecordingViewModel: ObservableObject {
     }
     
     func rewindVoiceMemo() {
+        
         self.playerDuration = self.playerDuration > 15 ? self.playerDuration - 15 : 0
         audioService.playAudio(seekTo: playerDuration)
     }
     
     func fastForwardVoiceMemo() {
-        self.playerDuration = self.playerDuration + 15 < self.selectedVoiceMemo?.duration ?? 0 ? self.playerDuration + 15 : self.selectedVoiceMemo?.duration ?? 0
-        audioService.playAudio(seekTo: playerDuration)
+        if let selectedVoiceMemo = selectedVoiceMemo {
+            self.playerDuration = (self.playerDuration + 15) < selectedVoiceMemo.duration ? self.playerDuration + 15 : selectedVoiceMemo.duration
+            audioService.playAudio(seekTo: playerDuration)
+        }
+        
     }
     
     
@@ -109,21 +113,23 @@ class RecordingViewModel: ObservableObject {
         stopVoiceMemo()
         
         audioService.requestRecordPermission { granted in
-            if granted {
-                if let url = self.audioService.startRecording() {
-                    self.isRecording = true
-                    self.recordingFilename = url.lastPathComponent
-                    self.timer?.invalidate()
-                    self.timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) {
-                    _ in
-                        self.duration += 1
+            DispatchQueue.main.async() {
+                if granted {
+                    if let url = self.audioService.startRecording() {
+                        self.isRecording = true
+                        self.recordingFilename = url.lastPathComponent
+                        self.timer?.invalidate()
+                        self.timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) {
+                            _ in
+                            self.duration += 1
+                        }
+                    } else {
+                        self.error = "Unable to start recording"
                     }
-                    
                 } else {
-                    print("error when starting recording")
+                    self.error = "Permission denied to record audio"
+                    
                 }
-            } else {
-                self.error = "Permission denied to record audio"
             }
         }
     }
@@ -143,6 +149,7 @@ class RecordingViewModel: ObservableObject {
         timer?.invalidate()
         timer = nil
         self.duration = 0
+        self.playerDuration = 0
     }
 }
 

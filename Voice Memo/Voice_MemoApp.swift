@@ -33,6 +33,5 @@ struct Voice_MemoApp: App {
             RecordingListView()
                 .environment(\.diContainer, diContainer)
         }
-//        .modelContainer(sharedModelContainer)
     }
 }
