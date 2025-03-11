@@ -11,12 +11,13 @@ struct RecordingListItem: View {
     @Binding var isSelected: Bool
     var voiceMemo: VoiceMemo
     @Binding var isPlaying: Bool
+    @State var seekPosition: TimeInterval
     
     var onDeleteCallback: (() -> Void)
     var onPlayCallback: (() -> Void)
     var onRewindCallback: (() -> Void)
     var onFastForwardCallback: (() -> Void)
-
+    var onSeekTo: ((TimeInterval) -> Void)
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -40,26 +41,27 @@ struct RecordingListItem: View {
                 }
             }
 
-
             if isSelected {
-
-                Slider(value: .constant(0.5), in: 0...1) {
-                    Text("Speed")
-                }
-                minimumValueLabel: {
+                Slider(value: $seekPosition, label: {
+                    
+                }, minimumValueLabel: {
                     Text("00:00")
-                        .font(.subheadline)
-                } maximumValueLabel: {
-                    Text("10:00")
-                        .font(.subheadline)
-                }
+                    .font(.subheadline)
+                }, maximumValueLabel: {
+                    Text(DateUtilities.formatTime(seekPosition))
+                    .font(.subheadline)
+                }, onEditingChanged: { isEditing in
+                    if (isEditing) {
+                        onSeekTo(seekPosition)
+                    }
+                })
                 .foregroundStyle(.white)
                 .padding(.vertical, 4)
                 .padding(.trailing, 16)
 
 
                 HStack {
-                    ShareLink(item: URL(string: "https://www.hackingwithswift.com")!) {
+                    ShareLink(item: FileUtilities.getDefaultDirectory(fileName: voiceMemo.fileName)) {
                         Image(systemName: "square.and.arrow.up")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
@@ -67,7 +69,6 @@ struct RecordingListItem: View {
                             .backgroundStyle(.clear)
                             .frame(width: DEFAULT_BUTTON_SIZE, height: DEFAULT_BUTTON_SIZE)
                         }
-
 
                     Spacer()
                     

@@ -29,6 +29,16 @@ class VoiceMemoRepository {
         }
     }
     
+    func updateVoiceMemo(_ voiceMemo: VoiceMemo) {
+        do {
+            try context.save()
+            
+        } catch {
+            print("Failed to save recording: \(error)")
+        }
+            
+    }
+    
     func getVoiceMemo(_ id: UUID) -> VoiceMemo? {
         let fetchDescriptor = FetchDescriptor<VoiceMemo>(
             predicate: #Predicate<VoiceMemo> { $0.id == id },

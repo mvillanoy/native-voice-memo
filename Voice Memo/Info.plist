@@ -4,8 +4,14 @@
 <dict>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>remote-notification</string>
-		<string>fetch</string>
+		<string>audio</string>
 	</array>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIImageName</key>
+		<string>SoundWave</string>
+		<key>UIImageRespectsSafeAreaInsets</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

@@ -28,8 +28,6 @@ struct RecordingView: View {
                         .padding(.bottom)
                 }
 
-                // TODO: Add Waveform view
-
                 Button {
                     AudioServicesPlaySystemSound(
                         viewModel.isRecording ? 1114 : 1113)
