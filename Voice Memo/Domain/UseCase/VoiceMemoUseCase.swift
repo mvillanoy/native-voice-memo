@@ -18,9 +18,9 @@ class VoiceMemoUseCase {
         repository.getVoiceMemos(query: query)
     }
     
-    func saveVoiceMemo(filename: String, fileURL: URL, duration: Int) {
+    func saveVoiceMemo(filename: String, duration: TimeInterval) {
         print("saveVoiceMemo use case")
-        repository.saveVoiceMemo(fileName: filename, fileURL: fileURL, duration: duration)
+        repository.saveVoiceMemo(fileName: filename, duration: duration)
     }
     
     func deleteVoiceMemo(_ voiceMemo: VoiceMemo) {

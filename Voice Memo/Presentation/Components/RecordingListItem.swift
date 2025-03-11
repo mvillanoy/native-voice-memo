@@ -10,7 +10,14 @@ let DEFAULT_BUTTON_SIZE: CGFloat = 25.0
 struct RecordingListItem: View {
     @Binding var isSelected: Bool
     var voiceMemo: VoiceMemo
-    @State var isPlaying: Bool = false
+    @Binding var isPlaying: Bool
+    
+    var onDeleteCallback: (() -> Void)
+    var onPlayCallback: (() -> Void)
+    var onRewindCallback: (() -> Void)
+    var onFastForwardCallback: (() -> Void)
+
+
     var body: some View {
         VStack(alignment: .leading) {
             Text(voiceMemo.fileName)
@@ -24,12 +31,13 @@ struct RecordingListItem: View {
                 .font(.caption)
                 .foregroundStyle(.gray)
                 Spacer()
-                
-                Text(
-                    DateUtilities.formatTime(voiceMemo.duration)
-                )
-                .font(.caption)
-                .foregroundStyle(.gray)
+                if !isSelected {
+                    Text(
+                        DateUtilities.formatTime(voiceMemo.duration)
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.gray)
+                }
             }
 
 
@@ -64,7 +72,7 @@ struct RecordingListItem: View {
                     Spacer()
                     
                     Button {
-
+                        onRewindCallback()
                     } label: {
                         Image(
                             systemName: "15.arrow.trianglehead.counterclockwise"
@@ -78,7 +86,7 @@ struct RecordingListItem: View {
                     }
 
                     Button {
-                        isPlaying.toggle()
+                        onPlayCallback()
                     } label: {
                         Image(systemName: isPlaying ? "pause.fill": "play.fill")
                             .resizable()
@@ -89,7 +97,7 @@ struct RecordingListItem: View {
                     }
 
                     Button {
-                        print("SHARE")
+                        onFastForwardCallback()
                     } label: {
                         Image(systemName: "15.arrow.trianglehead.clockwise")
                             .resizable()
@@ -103,7 +111,7 @@ struct RecordingListItem: View {
                     Spacer()
 
                     Button {
-                        print("Delete")
+                        onDeleteCallback()
                     } label: {
                         Image(systemName: "trash")
                             .resizable()

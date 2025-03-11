@@ -29,8 +29,21 @@ class VoiceMemoRepository {
         }
     }
     
-    func saveVoiceMemo(fileName: String, fileURL: URL, duration: Int) {
-        let voiceMemo = VoiceMemo(fileName: fileName, fileURL: fileURL, duration: duration)
+    func getVoiceMemo(_ id: UUID) -> VoiceMemo? {
+        let fetchDescriptor = FetchDescriptor<VoiceMemo>(
+            predicate: #Predicate<VoiceMemo> { $0.id == id },
+            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+        )
+        do {
+            return try context.fetch(fetchDescriptor).first
+        } catch {
+            print("Failed to fetch recordings: \(error)")
+            return nil
+        }
+    }
+    
+    func saveVoiceMemo(fileName: String, duration: TimeInterval) {
+        let voiceMemo = VoiceMemo(fileName: fileName, duration: duration)
         context.insert(voiceMemo)
         
         print("saveVoiceMemo repository")
@@ -44,12 +57,17 @@ class VoiceMemoRepository {
     }
 
     func deleteVoiceMemo(_ voiceMemo: VoiceMemo) {
-            do {
-                try FileManager.default.removeItem(at: voiceMemo.fileURL)
-                context.delete(voiceMemo)
-                try context.save()
-            } catch {
-                print("Failed to delete recording: \(error)")
+        print("deleteVoiceMemo repository")
+
+            context.delete(voiceMemo)
+                do {
+                    try context.save()
+                    try FileManager.default.removeItem(at: FileUtilities.getDefaultDirectory(fileName: voiceMemo.fileName))
+                } catch {
+                    print("Failed to delete recording: \(error)")
+                }
             }
-        }
+        
+
+        
 }

@@ -9,8 +9,7 @@ import AVFoundation
 import SwiftUI
 
 struct RecordingView: View {
-    @Environment(\.diContainer) var diContainer: DIContainer
-    @StateObject private var viewModel: RecordingViewModel = RecordingViewModel()
+    @EnvironmentObject var viewModel: RecordingViewModel
 
     var body: some View {
         HStack {
@@ -56,9 +55,6 @@ struct RecordingView: View {
             }
             Spacer()
 
-        }
-        .onAppear {
-            viewModel.setInjected(injected: diContainer)
         }
         .padding(.top, 24)
         .background(.sheetBackground)

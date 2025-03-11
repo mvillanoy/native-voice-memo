@@ -11,39 +11,51 @@ import SwiftUI
 struct RecordingListView: View {
     @Environment(\.diContainer) private var diContainer: DIContainer
     @Environment(\.modelContext) private var modelContext
-    @StateObject private var viewModel: RecordingListViewModel = RecordingListViewModel()
-    
-    @State var selectedItemId: UUID? = nil
-    @State var query: String = ""
-    
-    @Query(sort: \VoiceMemo.timestamp, order: .reverse) var voiceMemos: [VoiceMemo]
+    @StateObject private var viewModel: RecordingViewModel =
+        RecordingViewModel()
 
+    @State var query: String = ""
+    @State var selectedId: UUID? = nil
+//
+//    @Query(sort: \VoiceMemo.timestamp, order: .reverse) var voiceMemos:
+//        [VoiceMemo]
 
     var body: some View {
         VStack {
             NavigationView {
                 ScrollView {
-                    if voiceMemos.isEmpty {
+                    if viewModel.voiceMemos.isEmpty {
                         RecordingEmptyView()
                     } else {
-                        TextField("Search Voice Memos", text: self.$query)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .onChange(of: query) { newValue in
-                                
-                            }
+//                        TextField("Search Voice Memos", text: self.$query)
+//                            .textFieldStyle(RoundedBorderTextFieldStyle())
+//                            .onChange(of: query) { newValue in
+//
+//                            }
                         LazyVStack {
-                            ForEach(voiceMemos) { item in
-                                RecordingListItem(
-                                    isSelected: .constant(
-                                        selectedItemId == item.id),
-                                    voiceMemo: item
-                                )
+                            ForEach(viewModel.voiceMemos) { item in
+                                RecordingListItem(isSelected: .constant(selectedId == item.id), voiceMemo: item, isPlaying: .constant(viewModel.isPlaying)) {
+                                    viewModel.deleteVoiceMemo()
+                                } onPlayCallback: {
+                                    if viewModel.isPlaying {
+                                        viewModel.pauseVoiceMemo()
+                                    } else {
+                                        viewModel.playVoiceMemo()
+                                    }
+                                    
+                                } onRewindCallback: {
+                                    viewModel.rewindVoiceMemo()
+                                } onFastForwardCallback: {
+                                    viewModel.fastForwardVoiceMemo()
+
+                                }
                                 .onTapGesture {
                                     withAnimation(.smooth) {
-                                        selectedItemId = item.id
+                                        selectedId = item.id
+                                        viewModel.select(item)
                                     }
                                 }
-                                
+
                             }
                         }
                     }
@@ -51,6 +63,7 @@ struct RecordingListView: View {
                 .navigationBarTitle("Voice Memos")
             }
             RecordingView()
+                .environmentObject(viewModel)
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .onAppear {
